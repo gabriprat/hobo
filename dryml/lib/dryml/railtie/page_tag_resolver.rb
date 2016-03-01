@@ -7,7 +7,7 @@ module Dryml
         super()
       end
 
-      def find_templates(name, prefix, partial, details)
+      def find_templates(name, prefix, partial, details, outside_app_allowed = false)
         tag_name = @controller.dryml_fallback_tag || name.dasherize + '-page'
         method_name = tag_name.to_s.gsub('-', '_')
         if Dryml.empty_page_renderer(@controller.view_context).respond_to?(method_name)
