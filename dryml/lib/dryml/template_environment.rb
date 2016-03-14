@@ -50,7 +50,7 @@ module Dryml
           %w( debug_assets  assets_precompile  precompiled_asset_checker
               digest_assets assets_environment assets_manifest
               assets_prefix resolve_assets_with  )
-            .each { |key| self.send( key+'=', view.try(key) ) }
+            .each { |attr| self.send( attr+'=', view.try(attr) ) }
           
         end
       end
