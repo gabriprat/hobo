@@ -12,26 +12,28 @@ class Story < ActiveRecord::Base
   belongs_to :project, :inverse_of => :stories
   belongs_to :status, :class_name => "StoryStatus"
 
-  has_many :tasks, :dependent => :destroy, :order => :position, :accessible => true, :inverse_of => :story
+  has_many :tasks, :dependent => :destroy, :accessible => true
+
+  attr_accessible :title, :body, :color, :tasks, :status, :status_id
 
   children :tasks
 
   # --- Permissions --- #
 
   def create_permitted?
-    project.creatable_by?(acting_user)
+    project ? project.creatable_by?(acting_user) : true
   end
 
   def update_permitted?
-    project.updatable_by?(acting_user)
+    project ? project.updatable_by?(acting_user) : true
   end
 
   def destroy_permitted?
-    project.destroyable_by?(acting_user)
+    project ? project.destroyable_by?(acting_user) : true
   end
 
   def view_permitted?(field)
-    project.viewable_by?(acting_user)
+    project ? project.viewable_by?(acting_user) : true
   end
 
 end

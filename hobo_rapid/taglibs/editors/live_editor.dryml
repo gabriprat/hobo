@@ -17,9 +17,11 @@ When placed inside of a part, provides a complete parameterizable `<live-editor>
 
 ### Usage
 
-    <part name="my-part">
-      <live-editor-innards hide="puff"/>
-    </part>
+    <my-field-view:>
+      <div part="part-my-field">
+        <live-editor-innards hide="puff" style="margin-left: 10px"/>
+      </div>
+    </my-field-view:>
 
 ### Attributes
 

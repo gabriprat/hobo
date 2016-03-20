@@ -1,31 +1,8 @@
 # -*- coding: utf-8 -*-
 require 'test_helper'
-require 'capybara'
-require 'capybara/dsl'
-require 'database_cleaner'
-#require 'ruby-debug'
-
-Capybara.app = Agility::Application
-Capybara.default_driver = :rack_test
-DatabaseCleaner.strategy = :truncation
-
-Capybara.register_driver :selenium_chrome do |app|
-  Capybara::Selenium::Driver.new(app, :browser => :chrome)
-end
-
-def retry_on_timeout(n = 3, &block)
-  block.call
-rescue Capybara::TimeoutError, Capybara::ElementNotFound => e
-  if n > 0
-    puts "Catched error: #{e.message}. #{n-1} more attempts."
-    retry_on_timeout(n - 1, &block)
-  else
-    raise
-  end
-end
+require 'integration_test_helper'
 
 class CreateAccountTest < ActionDispatch::IntegrationTest
-  include Capybara::DSL
   self.use_transactional_fixtures = false
 
   setup do
@@ -34,12 +11,11 @@ class CreateAccountTest < ActionDispatch::IntegrationTest
 
   teardown do
     DatabaseCleaner.clean
-    User.all.*.destroy  # the cleaner should do this, but....
   end
 
   test "create account" do
-    Capybara.current_driver = :selenium_chrome
     visit root_path
+    Capybara.current_session.driver.resize(1024,700)
 
     # create administrator
     fill_in "user_name", :with => "Admin User"
@@ -91,10 +67,10 @@ class CreateAccountTest < ActionDispatch::IntegrationTest
     assert has_content?("The Task was created successfully")
 
     # test sortable-collection
-    find("ul.tasks li:last .ordering-handle").drag_to(find("ul.tasks li:first .ordering-handle"))
-    sleep 1
+    find("ul.tasks li:nth-child(2) .ordering-handle").drag_to(find("ul.tasks li:nth-child(1) .ordering-handle"))
+    sleep 0.2
     visit page.current_path
-    assert find("ul.tasks li:first .description").has_text?("Second Task")
+    assert find("ul.tasks li:nth-child(1) .description").has_text?("Second Task")
 
     # create Second User
     click_link "Log out"
@@ -114,10 +90,6 @@ class CreateAccountTest < ActionDispatch::IntegrationTest
     assert has_content?("You have logged in.")
     assert has_content?("New Project")
 
-    #click_link "New Project"
-    #fill_in "project_name", :with => "Second Project"
-    #click_button "Create Project"
-
     # switch to Test User
     click_link "Log out"
     click_link "Login"
@@ -131,7 +103,6 @@ class CreateAccountTest < ActionDispatch::IntegrationTest
     click_link "First Story"
 
     find("ul.tasks li:nth-child(1) a.task-link").click    # arg, real CSS doesn't have :first!
-    sleep 1
     find("div.task-users select").select("Second User")
     click_button "Save Task"
     assert has_content?("Assigned users: Test User, Second User")
@@ -168,11 +139,9 @@ class CreateAccountTest < ActionDispatch::IntegrationTest
     click_link "First Project"
     click_link "First Story"
     find("select.story_status").select("discussion")
-    #wait_for_visible "css=div.ajax-progress"
-    #wait_for_not_visible "css=div.ajax-progress"
 
     click_link "« Back to Project First Project"
-    assert_equal "discussion", find("span.story-status-name").text
+    assert find("span.story-status-name").has_text?("discussion")
 
     # check filtering
     select "documentation", :from => "status"
@@ -180,12 +149,13 @@ class CreateAccountTest < ActionDispatch::IntegrationTest
 
     # add project members
     fill_in "project_membership[user]", :with => "Second User"
-    find("a:contains('Second User')").click
-    find("form.project-membership input[type=text]").native.send_key(:enter)
+    sleep 0.5
+    click_on 'Second User'
+    page.execute_script("$('form.project-membership').submit()")
     assert find("ul.memberships").has_text?("Second User")
-
-    find("input.delete-project-membership-button").click
-    page.driver.browser.switch_to.alert.accept
-    assert find("ul.memberships").has_no_text?("Second User")
+    within "ul.memberships" do
+      click_on "X"
+    end
+    assert has_no_content?("Second User")
   end
 end

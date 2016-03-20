@@ -1,6 +1,6 @@
 class Module
 
-  # Custom alias_method_chain that won't cause inifinite recursion if
+  # Custom alias_method_chain that won't cause infinite recursion if
   # called twice.
   # Calling alias_method_chain on alias_method_chain
   # was just way to confusing, so I copied it :-/

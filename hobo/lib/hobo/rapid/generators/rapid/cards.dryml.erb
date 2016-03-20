@@ -14,7 +14,7 @@ creator_attribute     = model.creator_attribute
 primary_collection    = model.view_hints.primary_children
 
 if creator_attribute
-  creator_refl = model.reflections[creator_attribute]
+  creator_refl = model.reflections[creator_attribute.to_s]
   creator_link = creator_refl && linkable?(creator_refl.klass, :show)
 end
 

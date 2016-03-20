@@ -1,8 +1,5 @@
 //= require_tree .
 
-jQuery(document).ready(function() {
-    jQuery(document).hjq();
+$(document).on('ready page:load', function () {
+  jQuery(document).hjq();
 });
-jQuery(window).bind('page:change', function() {
-    jQuery(document).hjq();
-})

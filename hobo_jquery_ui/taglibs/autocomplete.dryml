@@ -35,7 +35,7 @@ Could be served by:
   events, html_attrs = attrs.partition_hash(['create', 'search', 'open', 'focus', 'select', 'close', 'change'])
   options["source"] ||= begin
                           complete_target = this_field_reflection.klass
-                          complete_target.find(:all, :limit => 5000).*.send(complete_target.name_attribute)
+                          complete_target.limit(5000).*.send(complete_target.name_attribute)
                         end
 
   html_attrs["name"] ||= param_name_for_this
@@ -48,7 +48,7 @@ Could be served by:
 
   add_data_rapid!(html_attrs, "autocomplete", :options => options, :events => events)
  %>
-  <wrap tag="span" class="field-with-errors" when="&!this_parent.errors[this_field].empty?">
+  <wrap tag="span" class="field-with-errors" when="&this_parent && !this_parent.errors[this_field].empty?">
     <input type="text" merge-attrs="&html_attrs"/>
   </wrap>
 </def>

@@ -1,3 +1,5 @@
+require 'will_paginate'
+
 module HoboCleanSidemenu
 
   VERSION = File.read(File.expand_path('../../VERSION', __FILE__)).strip

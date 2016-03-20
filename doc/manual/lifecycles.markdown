@@ -316,30 +316,47 @@ names listed in the `:params` option.
 
 ## Defining transitions
 
-A transition is an arc in the graph of the finite state machine -- an operation that takes the lifecycle from one state to another (or, potentially, back to the same state.). The definition looks like:
+A transition is an arc in the graph of the finite state machine -- an operation that takes the object from one state to another (or, potentially, back to the same state.). The definition of a transition looks like:
 
     transition name, { from => to }, options do ... end
 {.ruby}
 
-The name is a symbol. It should be a valid ruby name.
+The `name` is a symbol. It must be a valid Ruby name and will become name of the method called to transition the object. 
 
 The second argument is a hash with a single item:
 
     { from => to }
 {.ruby}
 
- (We chose this syntax for the API just because the `=>` is quite nice to indicate a transition)
+(We chose this syntax for the API just because the `=>` is quite nice to indicate a transition)
+ 
+For example:
 
-This transition can only be fired in the state or states given as `from`, which can be either a symbol or an array of symbols. On completion of this transition, the record will be in the state give as `to` which can be one of:
+    transition :review, { :submitted => :in_review }
+{.ruby}
 
- - A symbol -- the name of the state
- - A proc -- if the proc takes one argument it is called with the record, if it takes none it is `instance_eval`'d on the record. Should
-   return the name of the state
- - A string -- evaluated as a Ruby expression with in the context of the record
+This transition can only be fired in the state or states given as `from`, which can be either a symbol or an array of symbols. For example:
 
-The options are:
+    transition :accept, { [:in_review, :in_final_review] => :accepted }
+{.ruby}
 
- - `:params` - an array of attribute names that are parameters of this transition. These attributes can be set when the transition runs.
+In this example, the object can transition to the 'accepted' state from either the 'in_review' state or the 'in_final_review' state. 
+
+On completion of this transition, the object will be in the state give as `to` which can be one of:
+
+ - A symbol -- the name of the object's new state;
+ - A proc -- if the proc takes one argument it is called with the record, if it takes none it is `instance_eval`'d on the record. It should return the name of the new state;
+ - A string -- evaluated as a Ruby expression within the context of the record;
+
+Options to a transition can include the following:
+
+ - `:params` - an array of attribute names that are parameters of this transition. These attributes can be set when the transition runs. For example:
+
+
+    transition :reject, { [:in_review, :awaiting_final_review, :in_final_review ] => :rejected }, :params => [:comments]
+{.ruby}
+    
+    In this example, the comments attribute of the object will be updated with the contents of the `:comments` parameter passed on the method call (such as a form whose submit action calls the reject method (transition) and passes a `:comments` parameter to the method). 
 
  - `:if` and `:unless` -- a precondition on the transition. Pass either:
 
@@ -373,13 +390,55 @@ An example call:
 
 It is not required that a transition name is distinct from all the others. For example, a process may have many stages (states) and there may be an option to abort the process at any stage. It is possible to define several transitions called `:abort`, each starting from a different start state. You could achieve a similar effect by listing all the start states in a single transition, but by defining separate transitions, each one could, for example, be given a different action (block).
 
+NOTE
+If you repeat transitions, any `:params` you depend on in the variations of the transitions must be listed on the *first* variation of the transition, otherwise they will not be available to subsequent versions of the same transition. 
+
+For example: Given these two variations of a transition (available to different users), the [:comments] param on the second variation will NOT be available to the transition. 
+
+    transition :reject, {:submitted => :rejected},  
+      :available_to => 'acting_user if (acting_user.administrator? || acting_user.officer?)' do 
+      
+    transition :reject, {:in_review => :rejected}, :params => [:comments], 
+      :available_to => 'acting_user if (acting_user.administrator?)' do 
+{.ruby}
+
+For the second variation to support the param, it needs to be listed *first* in the lifecycle, as follows:
+
+    transition :reject, {:in_review => :rejected}, :params => [:comments], 
+      :available_to => 'acting_user if (acting_user.administrator?)' do 
+      
+    transition :reject, {:submitted => :rejected},  
+      :available_to => 'acting_user if (acting_user.administrator? || acting_user.officer?)' do 
+{.ruby}
+
+You may be depending on the :comments field to appear within a form as follows:
+
+      <call-tag tag="#{transition}-form">
+        <field-list:>
+          <comments-view:>
+            <text-area class="no-ckeditor"/>
+          </comments-view:>
+        </field-list:>
+        <actions: replace></actions:>
+      </call-tag>
+
+but it will only appear if it's listed on the first variation. 
+
+
+As mentioned earlier, if these two variations of the transition were made available to the same users, their ":from" transitions could be combined in an array:
+
+    transition :reject, { [:submitted, :in_review] => :rejected}, :params => [:comments], 
+      :available_to => 'acting_user if (acting_user.administrator? || acting_user.officer?)' do 
+{.ruby}
+
+
 
 ## The `:available_to` option
 
 Both create and transition steps can be made accessible to certain users with the `:available_to` option. If this option is given, the step is considered 'publishable', and there will be automatic support for the step in both the controller and view layers.
 
 The rules for the `:available_to` option are as follows. Firstly, it can be one of three special values:
-
+R
  - `:all` -- anyone, including guest users, can trigger the step
 
  - `:key_holder` -- (transitions only) anyone can trigger the transition, provided `record.lifecycle.provided_key` is set to the correct key. Discussed in detail later.
@@ -460,8 +519,6 @@ Validations have been extended so you can give the name of a lifecycle step to t
 
     validates_presence_of :notes, :on => :submit
 {.ruby}
-
-Also now supports `record.lifecycle.valid_for_foo?` where `foo` is a lifecycle transition.
 
 
 # Controller actions and routes

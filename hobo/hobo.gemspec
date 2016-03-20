@@ -14,11 +14,11 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency('hobo_support', ["= #{version}"])
   s.add_runtime_dependency('hobo_fields', ["= #{version}"])
   s.add_runtime_dependency('dryml', ["= #{version}"])
-  s.add_runtime_dependency('will_paginate', ["~> 3.0.0"])
+  s.add_runtime_dependency('hobo_will_paginate')
 
-  s.add_development_dependency('rubydoctest', [">= 1.1.3"])
+  # s.add_development_dependency('rubydoctest', [">= 1.1.3"])
   s.add_development_dependency('shoulda', [">= 0"])
-  s.add_development_dependency('irt', ["= 1.2.11"])
+  s.add_development_dependency('irt', ["= 1.3.2"])
   s.add_development_dependency('mocha')
   s.add_development_dependency('yard')
 

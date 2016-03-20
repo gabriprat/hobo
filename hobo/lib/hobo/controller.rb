@@ -96,7 +96,7 @@ module Hobo
           page << "#{function}(#{dom_id.to_json}, #{part_content.to_json})\n"
         elsif spec[:result]
           result = results[spec[:result].to_sym]
-          page << "#{function}(#{dom_id.to_json}, #{result.to_json})\n"
+          page << "#{function}(#{dom_id.to_json}, #{result.to_json});\n"
         else
           page << "alert('ajax_update_response: render_spec did not provide action');\n"
         end

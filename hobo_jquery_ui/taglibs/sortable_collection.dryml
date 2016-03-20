@@ -20,8 +20,8 @@ This tag assumes the controller has a `reorder` action and the model has a `posi
   events, html_attrs = attrs.partition_hash(['create', 'start', 'sort', 'change', 'beforeStop', 'stop', 'update', 'receive', 'remove', 'over', 'out', 'activate', 'deactivate'])
   ajax_attrs, html_attrs = attrs.partition_hash(HoboRapidHelper::AJAX_CALLBACKS)
 
-  singular_name = this.member_class.name.underscore
-  route_method = subsite ? "#{subsite}_reorder_#{singular_name.pluralize}_url" : "reorder_#{singular_name.pluralize}_url"
+  singular_name = this.member_class ? this.member_class.name.underscore : this.first.class.name.underscore
+  route_method = subsite ? "reorder_#{subsite}_#{singular_name.pluralize}_path" : "reorder_#{singular_name.pluralize}_path"
   reorder_url = send(route_method)
 
   add_classes!(html_attrs, "sortable-collection")

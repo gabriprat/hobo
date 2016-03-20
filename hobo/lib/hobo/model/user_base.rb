@@ -42,7 +42,7 @@ module Hobo
           # https://hobo.lighthouseapp.com/projects/8324-hobo/tickets/530
           attr_accessor :current_password, :password, :password_confirmation, :type => :password
 
-          before_save :encrypt_password
+          before_save :encrypt_password, :downcase_email
           after_save :stash_current_password
 
           never_show *AUTHENTICATION_FIELDS
@@ -75,6 +75,9 @@ module Hobo
 
         # Authenticates a user by their login name and unencrypted password.  Returns the user or nil.
         def authenticate(login, password)
+          # Downcase emails before logging in
+          login = login.downcase if attr_type(@login_attribute) == HoboFields::Types::EmailAddress
+
           u = where("#{@login_attribute} = ?", login).first # need to get the salt
 
           if u && u.authenticated?(password)
@@ -177,6 +180,13 @@ module Hobo
       def validate_current_password_when_changing_password
         errors.add :current_password, I18n.t("hobo.messages.current_password_is_not_correct", :default => "is not correct") \
           if changing_password? && !authenticated?(current_password)
+      end
+
+      # Downcase emails used for logging in before saving them to the database
+      def downcase_email
+        if self.login.class == HoboFields::Types::EmailAddress
+          self.login = self.login.downcase
+        end
       end
 
     end

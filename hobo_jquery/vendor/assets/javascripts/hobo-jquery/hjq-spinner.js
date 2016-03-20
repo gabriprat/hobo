@@ -22,6 +22,12 @@
            The spinner is returned.
         */
         init: function(options, default_message) {
+            // Options from Dryml now come with underscores. This simple workaround turns them to dashes:
+            options['spinner-options'] = options['spinner_options'];
+            options['spinner-at'] = options['spinner_at'];
+            options['spinner-next-to'] = options['spinner_next_to'];
+            options['no-spinner'] = options['no_spinner'];
+
             var original=$("#ajax-progress-wrapper .ajax-progress:first");
             if (original.length==0) return $();
 

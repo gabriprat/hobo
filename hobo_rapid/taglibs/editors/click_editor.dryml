@@ -24,8 +24,8 @@ When placed inside of a part, provides a complete parameterizable `<click-editor
         <before-view:>My</before-view:>
         <view: replace>
           My <view restore/>
-        </view: replace>
-      </click-editor-innads>
+        </view:>
+      </click-editor-innards>
     </part>
 
 ### Attributes

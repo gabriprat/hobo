@@ -68,7 +68,7 @@ ActiveRecord::Associations::HasManyThroughAssociation.class_eval do
   end
 
 
-  def create_record_with_user_create(attrs, options, raise = false, &block)
+  def _create_record_with_user_create(attrs, options, raise = false, &block)
     klass = @reflection.klass
     user = acting_user if klass < Hobo::Model
     if user
@@ -86,7 +86,7 @@ ActiveRecord::Associations::HasManyThroughAssociation.class_eval do
       create_record_without_user_create(attrs, options, raise, &block)
     end
   end
-  alias_method_chain :create_record, :user_create
+  alias_method_chain :_create_record, :user_create
 
 
   def insert_record_with_owner_attributes(record, force = true, raise = false)
@@ -103,13 +103,21 @@ ActiveRecord::Associations::HasManyThroughAssociation.class_eval do
 
   # TODO - add dependent option support
   def delete_records_with_hobo_permission_check(records, method)
-    klass  = @reflection.through_reflection.klass
     user = acting_user
+
+    problem_joiner=nil
+    association = self.respond_to?(:proxy_association) ? proxy_association : self
+    through_assoc_name = association.send(:through_reflection).name
     if user && records.any? { |r|
-        joiner = klass.where(construct_join_attributes(r)).first
+        ja = construct_join_attributes(r)
+        problem_joiner = joiner = association.owner.send(through_assoc_name).where(ja).first
         joiner.is_a?(Hobo::Model) && !joiner.destroyable_by?(user)
       }
-      raise Hobo::PermissionDeniedError, "#{@owner.class}##{proxy_association.reflection.name}.destroy"
+      message =  "#{@owner.class}##{association.reflection.name}.destroy "
+      if 'development' == Rails.env
+        message += " because of #{problem_joiner.class.name}(#{problem_joiner.to_json})"
+      end
+      raise Hobo::PermissionDeniedError, message
     end
     delete_records_without_hobo_permission_check(records, method)
   end

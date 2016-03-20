@@ -54,8 +54,7 @@ All the standard ajax attributes *except the callbacks* are supported (see the m
       attributes[:type] ||= 'submit'
     end
     label ||= t("hobo.actions.remove", :default=>"Remove")
-    confirm = t("hobo.messages.confirm", :default=>"Are you sure?") if confirm.nil?
-    ajax_attrs[:confirm] = confirm if confirm
+    ajax_attrs[:confirm] = confirm ? confirm : t("hobo.messages.confirm_delete", :name => this.to_s, :default=>"Are you sure that you want to delete #{this.to_s}?")
 
     add_classes!(attributes,
                  image ? "image-button" : "button",

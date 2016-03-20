@@ -6,4 +6,4 @@ gem 'hobo_support', :path => '../hobo_support'
 gemspec
 
 gem 'yard'
-
+gem 'rails'

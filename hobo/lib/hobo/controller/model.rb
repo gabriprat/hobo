@@ -269,7 +269,7 @@ module Hobo
 
 
       def auto_actions_for(owner, actions)
-        name = model.reflections[owner].macro == :has_many ? owner.to_s.singularize : owner
+        name = model.reflections[owner.to_s].macro == :has_many ? owner.to_s.singularize : owner
 
         owner_actions[owner] ||= []
         Array(actions).each do |action|
@@ -335,13 +335,13 @@ module Hobo
 
 
     def parse_sort_param(*args)
-      _, desc, field = *params[:sort]._?.match(/^(-)?([a-z_]+(?:\.[a-z_]+)?)$/)
+      _, desc, field = *params[:sort]._?.match(/^(-)?([a-z0-9_]+(?:\.[a-z0-9_]+)?)$/)
 
       if field
         hash = args.extract_options!
         db_sort_field = (hash[field] || hash[field.to_sym] || (field if field.in?(args) || field.to_sym.in?(args))).to_s
 
-        if db_sort_field
+        unless db_sort_field.blank?
           if db_sort_field == field && field.match(/\./)
             fields = field.split(".", 2)
             db_sort_field = "#{fields[0].pluralize}.#{fields[1]}"
@@ -358,7 +358,7 @@ module Hobo
 
 
     def find_instance(options={})
-      model.user_find(current_user, params[:id], options) do |record|
+      model.user_find(current_user, params[:id]) do |record|
         yield record if block_given?
       end
     end
@@ -458,14 +458,15 @@ module Hobo
         options.reverse_merge!(:page => params[:page] || 1)
         finder.paginate(options)
       else
-        finder.all(options.except(*WILL_PAGINATE_OPTIONS))
+        # Equivalent to the old finder.scoped (http://stackoverflow.com/a/18199294)
+        finder.where(nil)
       end
     end
 
 
     def find_owner_and_association(owner_association)
       owner_name = name_of_auto_action_for(owner_association)
-      refl = model.reflections[owner_association]
+      refl = model.reflections[owner_association.to_s]
       id = params["#{owner_name}_id"]
       owner = refl.klass.find(id)
       instance_variable_set("@#{owner_association}", owner)
@@ -473,7 +474,7 @@ module Hobo
     end
 
     def name_of_auto_action_for(owner_association)
-      model.reflections[owner_association].macro == :has_many ? owner_association.to_s.singularize : owner_association
+      model.reflections[owner_association.to_s].macro == :has_many ? owner_association.to_s.singularize : owner_association
     end
 
     # --- Action implementations --- #
@@ -692,7 +693,7 @@ module Hobo
       if params[:render]
         hobo_ajax_response || render(:nothing => true)
       else
-        respond_with(self.this, :location => destination_after_submit(this, true, options))
+        redirect_to destination_after_submit(this, true, options)
       end
     end
 
@@ -720,7 +721,9 @@ module Hobo
           hobo_ajax_response || render(:nothing => true)
         else
           location = destination_after_submit(options)
-          respond_with(self.this, :location => location)
+          respond_with(self.this) do |wants|
+            wants.html { redirect_to location }
+          end
         end
       else
         this.exempt_from_edit_checks = true
@@ -774,12 +777,12 @@ module Hobo
 
       begin
         finder = finder.send(options[:query_scope], params[options[:param]])
-        items = finder.find(:all).select { |r| r.viewable_by?(current_user) }
+        items = finder.select { |r| r.viewable_by?(current_user) }
       rescue TypeError  # must be a list of methods instead
         items = []
         options[:query_scope].each do |qscope|
           finder2 = finder.send(qscope, params[options[:param]])
-          items += finder2.find(:all).select { |r| r.viewable_by?(current_user) }
+          items += finder2.all.select { |r| r.viewable_by?(current_user) }
         end
       end
       if request.xhr?
@@ -813,7 +816,7 @@ module Hobo
 
     def permission_denied(error)
       self.this = true # Otherwise this gets sent user_view
-      logger.info "Hobo: Permission Denied!"
+      logger.info "Hobo: Permission Denied! (#{error.inspect})"
       @permission_error = error
       if self.class.superclass.method_defined?("permission_denied")
         super

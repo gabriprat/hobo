@@ -7,8 +7,8 @@ module Hobo
         klass.class_eval do
           extend ClassMethods
 
-          alias_method_chain :create, :hobo_permission_check
-          alias_method_chain :update, :hobo_permission_check
+          alias_method_chain :_create_record, :hobo_permission_check
+          alias_method_chain :_update_record, :hobo_permission_check
           alias_method_chain :destroy, :hobo_permission_check
           class << self
             alias_method_chain :has_many, :hobo_permission_check
@@ -79,9 +79,9 @@ module Hobo
         #  ensure active_user gets passed down to :dependent => destroy
         #  associations  (Ticket #528)
 
-        def has_many_with_hobo_permission_check(association_id, options = {}, &extension)
-          has_many_without_hobo_permission_check(association_id, options, &extension)
-          reflection = reflections[association_id]
+        def has_many_with_hobo_permission_check(association_id, *args, &extension)
+          has_many_without_hobo_permission_check(association_id, *args, &extension)
+          reflection = reflections[association_id.to_s]
           if reflection.options[:dependent]==:destroy
             #overriding dynamic method created in ActiveRecord::Associations#configure_dependency_for_has_many
             method_name =  "has_many_dependent_destroy_for_#{reflection.name}".to_sym
@@ -91,9 +91,9 @@ module Hobo
           end
         end
 
-        def has_one_with_hobo_permission_check(association_id, options = {}, &extension)
-          has_one_without_hobo_permission_check(association_id, options, &extension)
-          reflection = reflections[association_id]
+        def has_one_with_hobo_permission_check(association_id, *args, &extension)
+          has_one_without_hobo_permission_check(association_id, *args, &extension)
+          reflection = reflections[association_id.to_s]
           if reflection.options[:dependent]==:destroy
             #overriding dynamic method created in ActiveRecord::Associations#configure_dependency_for_has_one
             method_name =  "has_one_dependent_destroy_for_#{reflection.name}".to_sym
@@ -106,9 +106,9 @@ module Hobo
           end
         end
 
-        def belongs_to_with_hobo_permission_check(association_id, options = {}, &extension)
-          belongs_to_without_hobo_permission_check(association_id, options, &extension)
-          reflection = reflections[association_id]
+        def belongs_to_with_hobo_permission_check(association_id, *args, &extension)
+          belongs_to_without_hobo_permission_check(association_id, *args, &extension)
+          reflection = reflections[association_id.to_s]
           if reflection.options[:dependent]==:destroy
             #overriding dynamic method created in ActiveRecord::Associations#configure_dependency_for_belongs_to
             method_name =  "belongs_to_dependent_destroy_for_#{reflection.name}".to_sym
@@ -132,23 +132,23 @@ module Hobo
         acting_user && !(self.class.has_lifecycle? && lifecycle.active_step)
       end
 
-      def create_with_hobo_permission_check(*args, &b)
+      def _create_record_with_hobo_permission_check(*args, &b)
         if permission_check_required?
-          create_permitted? or raise PermissionDeniedError, "#{self.class.name}#create"
+          create_permitted? or raise PermissionDeniedError, "#{self.class.name} #{self.id}#create"
         end
-        create_without_hobo_permission_check(*args, &b)
+        _create_record_without_hobo_permission_check(*args, &b)
       end
 
-      def update_with_hobo_permission_check(*args)
+      def _update_record_with_hobo_permission_check(*args)
         if permission_check_required?
-          update_permitted? or raise PermissionDeniedError, "#{self.class.name}#update"
+          update_permitted? or raise PermissionDeniedError, "#{self.class.name} #{self.id}#update"
         end
-        update_without_hobo_permission_check(*args)
+        _update_record_without_hobo_permission_check(*args)
       end
 
       def destroy_with_hobo_permission_check
         if permission_check_required?
-          destroy_permitted? or raise PermissionDeniedError, "#{self.class.name}#.destroy"
+          destroy_permitted? or raise PermissionDeniedError, "#{self.class.name} #{self.id}#.destroy"
         end
 
         destroy_without_hobo_permission_check
@@ -244,7 +244,7 @@ module Hobo
           # No setter = no edit permission
           return false if !respond_to?("#{attribute}=")
 
-          refl = self.class.reflections[attribute.to_sym]
+          refl = self.class.reflections[attribute.to_s]
           if refl && refl.macro != :belongs_to # a belongs_to is handled the same as a regular attribute
             return association_editable_by?(user, refl)
           end
@@ -255,6 +255,7 @@ module Hobo
 
 
       def attribute_protected?(attribute)
+        return false if attribute.nil?
         attribute = attribute.to_s
 
         return true if self.class.send(:attributes_protected_by_default).include? attribute
@@ -337,7 +338,7 @@ module Hobo
       end
 
       def with_attribute_or_belongs_to_keys(attribute)
-        if (refl = self.class.reflections[attribute.to_sym]) && refl.macro == :belongs_to
+        if (refl = self.class.reflections[attribute.to_s]) && refl.macro == :belongs_to
           if refl.options[:polymorphic]
             yield refl.foreign_key, refl.options[:foreign_type]
           else
@@ -385,7 +386,7 @@ module Hobo
           end
         end
 
-        if (refl = self.class.reflections[attr.to_sym]) && refl.macro == :belongs_to
+        if (refl = self.class.reflections[attr.to_s]) && refl.macro == :belongs_to
           # A belongs_to -- also unknownify the underlying fields
           unknownify_attribute refl.foreign_key
           unknownify_attribute refl.options[:foreign_type] if refl.options[:polymorphic]
@@ -428,7 +429,7 @@ module Hobo
 
         metaclass.send :remove_method, attr
 
-        if (refl = self.class.reflections[attr]) && refl.macro == :belongs_to
+        if (refl = self.class.reflections[attr.to_s]) && refl.macro == :belongs_to
           # A belongs_to -- restore the underlying fields
           deunknownify_attribute refl.foreign_key
           deunknownify_attribute(refl.options[:foreign_type], false) if refl.options[:polymorphic]

@@ -180,7 +180,7 @@ require 'fileutils'
         # option is the same as the target classes position_column, that's a
         # pretty safe bet
         if defined? ActiveRecord::Acts::List::InstanceMethods
-          refl = model.reflections[collection]
+          refl = model.reflections[collection.to_s]
           klass = refl.klass
           klass < ActiveRecord::Acts::List::InstanceMethods &&
             klass.table_exists? &&

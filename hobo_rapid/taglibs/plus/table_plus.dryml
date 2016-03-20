@@ -53,6 +53,6 @@ sort-columns: a hash that allow you to map fields to sortable columns.   The def
     </table>
     <empty-collection-message param="empty-message"/>
 
-    <page-nav param if="&this.respond_to?(:page_count) || this.respond_to?(:total_pages)" merge-attrs="&ajax_attrs" />
+    <page-nav param if="&this.method_defined?(:page_count) || this.method_defined?(:total_pages)" merge-attrs="&ajax_attrs" />
   </div>
 </def>

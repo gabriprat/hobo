@@ -7,9 +7,6 @@ Agility::Application.configure do
   # and recreated between test runs.  Don't rely on the data there!
   config.cache_classes = true
 
-  # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
-
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
@@ -39,4 +36,7 @@ Agility::Application.configure do
   # Expands the lines which load the assets
   config.assets.debug = true
 
+  config.eager_load = false
+
+  config.active_support.test_order = :sorted
 end

@@ -31,7 +31,7 @@ module Hobo
             who.detect { |w| publishable_by(user, w, record) }
 
           else
-            refl = record.class.reflections[who]
+            refl = record.class.reflections[who.to_s]
             if refl && refl.macro == :has_many
               record.send(who).include?(user)
             elsif refl && refl.macro == :belongs_to

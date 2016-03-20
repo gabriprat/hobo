@@ -13,10 +13,10 @@ module Hobo
 
         collection_name = $1.to_sym
         anchor_association_name = $2.to_sym
-        if (refl = self.class.reflections[collection_name]) && refl.macro == :has_many
+        if (refl = self.class.reflections[collection_name.to_s]) && refl.macro == :has_many
           # the association name matches (e.g. comment_for_...)
 
-          if (anchor_refl = refl.klass.reflections[anchor_association_name]) && anchor_refl.macro == :belongs_to
+          if (anchor_refl = refl.klass.reflections[anchor_association_name.to_s]) && anchor_refl.macro == :belongs_to
             # the whole thing matches (e.g. comment_for_user)
 
 
@@ -52,7 +52,7 @@ module Hobo
 
       def initialize(owner, name, collection, anchor_association)
         @association = owner.send(collection)
-        @anchor_reflection = @association.member_class.reflections[anchor_association]
+        @anchor_reflection = @association.member_class.reflections[anchor_association.to_s]
         @name = name
       end
 

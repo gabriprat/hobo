@@ -103,11 +103,15 @@ gem 'hobo_clean', :path => '#{dev_root}'
 gem 'hobo_clean_admin', :path => '#{dev_root}'
 gem 'hobo_jquery', :path => '#{dev_root}'
 gem 'hobo_jquery_ui', :path => '#{dev_root}'
+gem 'protected_attributes'
+gem 'responders', '~> 2.0'
 )
               end
             else
               file.puts %(
 gem '#{gem}', '= #{version}'
+gem 'protected_attributes'
+gem 'responders', '~> 2.0'
 )
             end
             if is_hobo
@@ -148,7 +152,9 @@ say "Please, remember to run `hobo g setup_wizard` from the application root dir
             end
           end
           puts "Generating Rails infrastructure..."
-          system "rails new #{app_name} #{ARGV * ' '} -m #{template_path}"
+          # If the RAILS_VERSION variable exists, pass it to the rails new command
+          rails_version = ENV['RAILS_VERSION'] ? "_#{ENV['RAILS_VERSION']}_" : ""
+          system "rails #{rails_version} new #{app_name} #{ARGV * ' '} -m #{template_path}"
           File.delete template_path
 
         when /^(g|generate|destroy)$/

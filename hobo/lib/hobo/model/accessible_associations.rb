@@ -11,7 +11,7 @@ module Hobo
         array.map! do |record_hash_or_string|
           finder = association.member_class
           conditions = association.proxy_association.reflection.options[:conditions]
-          finder = finder.scoped :conditions => conditions unless conditions == [[]] || conditions == [[],[]]
+          finder = finder.where(conditions) unless conditions == [[]] || conditions == [[],[]]
           find_or_create_and_update(owner, association_name, finder, record_hash_or_string) do |id|
             # The block is required to either locate find an existing record in the collection, or build a new one
             if id
@@ -54,7 +54,7 @@ module Hobo
               record.send(method, owner) if record.respond_to? method
             end
           else
-            owner.include_in_save(association_name, record) unless owner.class.reflections[association_name].options[:through]
+            owner.include_in_save(association_name, record) unless owner.class.reflections[association_name.to_s].options[:through]
           end
         else
           # It's already a record
@@ -90,8 +90,9 @@ module Hobo
       end
 
       def finder_for_belongs_to(record, name)
-        refl = record.class.reflections[name]
-        conditions = ActiveRecord::Associations::BelongsToAssociation.new(record, refl).reflection.send(:conditions)
+        refl = record.class.reflections[name.to_s]
+        #conditions = ActiveRecord::Associations::BelongsToAssociation.new(record, refl).reflection.send(:conditions)
+        conditions = [[]]
         conditions == [[]] || conditions == [[],[]] ? refl.klass : refl.klass.scoped(:conditions => conditions)
       end
 
@@ -102,8 +103,21 @@ module Hobo
 
       # --- has_many mass assignment support --- #
 
-      def self.has_many_with_accessible(name, options={}, &block)
-        has_many_without_accessible(name, options, &block)
+      def self.has_many_with_accessible(name, *args, &block)
+        # Rails 4 supports a lambda as the second argument in a has_many association
+        # We need to support it too (required for gems like papertrail)
+        # The problem is that when it is not used, the options hash is taken as the scope
+        # To fix this, we make a small hack checking the second argument's class
+        if args.size == 0 || (args.size == 1 && args[0].kind_of?(Proc))
+            options = {}
+            args.push(options)
+        elsif args.size == 1
+            options = args[0]
+        else
+            options = args[1]
+        end
+        has_many_without_accessible(name, *args, &block)
+        # End of the received_scope hack
 
         if options[:accessible]
           class_eval %{
@@ -123,8 +137,16 @@ module Hobo
 
       # --- belongs_to assignment support --- #
 
-      def self.belongs_to_with_accessible(name, options={}, &block)
-        belongs_to_without_accessible(name, options, &block)
+      def self.belongs_to_with_accessible(name,*args, &block)
+        if args.size == 0 || (args.size == 1 && args[0].kind_of?(Proc))
+            options = {}
+            args.push(options)
+        elsif args.size == 1
+            options = args[0]
+        else
+            options = args[1]
+        end
+        belongs_to_without_accessible(name,*args, &block)
 
         if options[:accessible]
           class_eval %{
@@ -163,8 +185,7 @@ module Hobo
 
 
       # Add :accessible to the valid options so AR doesn't complain
-      ::ActiveRecord::Associations::Builder::BelongsTo.valid_options << :accessible
-      ::ActiveRecord::Associations::Builder::HasMany.valid_options << :accessible
+      ::ActiveRecord::Associations::Builder::Association.valid_options << :accessible
 
     end
   end

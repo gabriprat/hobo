@@ -3,6 +3,7 @@
         >> require 'active_support'
         >> require 'action_view'
         >> require 'action_controller'
+        >> require 'sprockets/railtie'
         >> $:.unshift File.join(File.expand_path(File.dirname(__FILE__)), '../../hobo_support/lib')
         >> $:.unshift File.join(File.expand_path(File.dirname(__FILE__)), '../../dryml/lib')
         >> require 'hobo_support'

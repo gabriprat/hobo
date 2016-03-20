@@ -1,73 +1,67 @@
 # Hobo in Two Minutes
 
-To build a Hobo 2.0 app you need to have a working Rails setup. If you can
-create a Rails app and have it connect to a database, you're all set.
+## Prerequisites
 
-You need at least version 3.2.5 of Rails:
+Before installing Hobo, you must have
+[Ruby](http://www.ruby-lang.org/en/) and
+[RubyGems](http://docs.rubygems.org/). You will also need the "git" command.
 
-	$ rails -v
+Installing Hobo 2.1 will cause Rails 4 to be installed when the Hobo application generator first runs 'bundle install'.
 
-## Windows && OS X
+For example, these are the steps you would need in Ubuntu 12.04:
 
-First install Hobo.
+        sudo apt-get update
+        sudo apt-get install -y ruby1.9.3 rubygems nodejs libsqlite3-dev git
+        export GEM_HOME=$HOME/.gem
+        echo "export GEM_HOME=$HOME/.gem" >> .bashrc
+        PATH="$HOME/.gem/bin:$PATH"
+        echo 'PATH="$HOME/.gem/bin:$PATH"' >> .bashrc
 
-	$ gem install hobo
 
-	$ hobo -v
+Note: Hobo 2.1 is currently tested against Rails 4.0.6 and Ruby 2.0. Ruby 2.1 should work with the master branch too, but it has not been so thoroughly tested ([read conversation](https://groups.google.com/forum/#!msg/hobousers/Ylugi_lygYs/cVJObcuzXyAJ)).
 
-Now create an app! We've only got two minutes so we'll create an ultra-useful Thing Manager.
+## Install Hobo
 
-	$ hobo new thingybob --setup
+	gem install hobo
+
+## Create a new Hobo application
+
+NOTE: Before creating a new Hobo application, check if you have the HOBODEV environment variable defined:
+
+	$ echo $HOBODEV
+	
+If it is defined and points to a local copy of Hobo source, you should temporarily undefine it, otherwise
+the generated Gemfile in your new Hobo application will reference the HOBODEV source code instead of the Hobo gem. 
+This will likley cause unresolved dependencies when the Hobo application generator runs 'bundle install'. 
+You can unset the HOBODEV variable by typing
+	
+	$ unset HOBODEV
+
+Now, create your new Hobo application:
+
+	hobo new thingybob --setup
+
 
 (The `--setup` option tells hobo to use the defaults rather than
 asking questions about your application.   After you play with
 Hobo a bit so that you understand the questions, you will probably
 want to omit the `--setup`)
 
-Now skip the "Linux" section and move on to the "common" section.
 
-## Linux
-
-First install Hobo.
-
-	$ gem install hobo
-
-	$ hobo -v
-
-Now create an app! We've only got two minutes so we'll create an ultra-useful Thing Manager.
-
-	$ hobo new thingybob
-
-It will ask you `Do you want to start the Setup Wizard now?`.  Answer "n".  We need to fix up the Rails Gemfile, and then we'll start the Setup Wizard.
-
-Using your editor of choice, edit the file `Gemfile`.   There is a line that looks like this:
-
-     # gem 'therubyracer', :platforms => :ruby
-
-Remove the `#` from the beginning of the line to uncomment it.  Then run:
-
-     $ bundle
-     $ hobo generate setup_wizard --wizard=false
-
-(The `--wizard=false` option tells hobo to use the defaults rather than
-asking questions about your application.   After you play with
-Hobo a bit so that you understand the questions, you will probably
-want to omit the `--wizard=false`)
-
-# Common
+## Add a resource and start the app
 
 There will be lots of output produced as Hobo runs the rails command
 and runs the setup generator. This process may take a while, depending
 on your internet connection and computer speed.
 
-	$ cd thingybob
-	$ hobo g resource thing name:string body:text
-	$ hobo g migration
+	cd thingybob
+	hobo g resource thing name:string body:text
+	hobo g migration
 
 	...Respond to the prompt with 'm'
 	...then press enter to chose the default filename
 
-	$ rails s
+	rails s
 
 And browse to
 
@@ -79,4 +73,11 @@ And there is your app! You should be able to
 * Create and edit Things
 * Search for things
 
-That's it. Why not try another of the tutorials on your left.
+That's it. Why not try another of the tutorials on your left?
+
+Note: If you wish to download the gems directly, you can get them from
+[RubyGems.org](http://rubygems.org).
+
+The source code for Hobo is available at [github:Hobo/hobo](http://github.com/Hobo/hobo) and additional sources are available in the [github Hobo organization](https://github.com/Hobo)
+
+

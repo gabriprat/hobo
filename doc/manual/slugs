@@ -66,7 +66,6 @@ generators/routes
 generators/setup_wizard
 generators/subsite
 generators/subsite_taglib
-generators/test_framework
 generators/user_controller
 generators/user_mailer
 generators/user_model

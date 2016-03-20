@@ -236,7 +236,6 @@
                 }
             }
 
-            result.context = this;
             result.type = o.type || 'GET';
             result.data = {};
             /* These are now the defaults, so we don't need to send
@@ -279,7 +278,7 @@
             if (!o.attrs) o.attrs = {};
             if (!o.extra_callbacks) o.extra_callbacks = {};
 
-            var spinner = this.hjq_spinner(o.attrs, "Saving...");
+            var spinner = (result == false) ? false : this.hjq_spinner(o.attrs, "Saving...");
 
             var success_dfd = jQuery.Deferred();
             if(o.attrs.success) success_dfd.done(methods.createFunction.call(that, o.attrs.success));

@@ -31,10 +31,6 @@ module Generators
         application "# Hobo: the #{file_name} subsite loads #{file_name}.css & #{file_name}.js"
       end
 
-      hook_for :test_framework, :as => :controller do | instance, controller_test |
-        instance.invoke controller_test, ["#{instance.name}_site"]
-      end
-
       private
 
       def subsite_name

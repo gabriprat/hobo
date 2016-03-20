@@ -48,7 +48,11 @@ module HoboRapidHelper
 
     # returns the number of items in the collection.  See LH #889
     def collection_count
-      this.try.to_int || this.try.total_entries || (this.try.loaded? && this.try.length) || this.try.count || this.try.length
+      if this.respond_to?(:to_a)
+        this.try.count
+      else
+        this.try.to_int || this.try.total_entries || (this.try.loaded? && this.try.length) || this.try.count || this.try.length
+      end
     end
 
     def through_collection_names(object=this)
@@ -133,13 +137,18 @@ module HoboRapidHelper
                    end
           attrs[:action] = attrs[:web_method] || attrs[:lifecycle]
           object_url(target, attrs[:action], :method => method)
+        rescue => e
+          logger.info "error while trying to find out the form action automatically: #{e.message}"
         end
 
       if attrs[:action].nil? && (form_attrs[:action].nil? ||
                                  (attrs[:lifecycle].nil? && new_record && !this.creatable_by?(current_user)) ||
                                  (attrs[:lifecycle].nil? && !new_record && !can_edit?))
         Dryml.last_if = false
-        logger.info("permission denied; unable to render form")
+        reason = "and the automatic action could not be found" if form_attrs[:action].nil?
+        reason = "and this.creatable_by?(current_user) returned false" if (attrs[:lifecycle].nil? && new_record && !this.creatable_by?(current_user))
+        reason = "and can_edit? returned false" if (attrs[:lifecycle].nil? && !new_record && !can_edit?)
+        logger.info("unable to render form: the 'action' attribute was not provided #{reason}")
         return nil
       else
         if method == "put" || method == "delete"
@@ -168,7 +177,7 @@ module HoboRapidHelper
                      end
 
         unless method == "get"
-          page_path = if (request.post? || request.put? || request.delete?) && params[:page_path]
+          page_path = if params[:page_path]
                         params[:page_path]
                       else
                         request.fullpath

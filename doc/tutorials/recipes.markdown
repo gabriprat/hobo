@@ -14,6 +14,7 @@
 
 [Add a new recipe or tutorial](https://github.com/Hobo/hobodoc/new/master/doc/tutorials)
 
+* [Live CKEditor in Hobo](https://gist.github.com/haslinger/7838039) by Stefan Haslinger
 * [Mobile & iPad friendly sortable-collections](1804-mobile-ipad-friendly-sortable-collections) by Henry Baragar
 * [Use your own hobo fork](1803-use-your-own-hobo-fork) by kredmer
 * [Appcelerator Titanium (Mobile App) and Hobo](1802-appcelerator-titanium-mobile-app-and-hobo) by mdkarp

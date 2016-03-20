@@ -1,6 +1,15 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.12'
+gem 'rails', '4.2.5.1'
+
+# Use SCSS for stylesheets
+gem 'sass-rails'
+
+# Use Uglifier as compressor for JavaScript assets
+gem 'uglifier', '>= 1.3.0'
+
+# Use CoffeeScript for .js.coffee assets and views
+gem 'coffee-rails', '~> 4.0.0'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -12,46 +21,29 @@ platform :jruby do
   gem 'activerecord-jdbcsqlite3-adapter'
 end
 
-# Use unicorn as the web server
-# gem 'unicorn'
-
-# Deploy with Capistrano
-# gem 'capistrano'
-
-# tO USE DEbugger (ruby-debug for Ruby 1.8.7+, ruby-debug19 for Ruby 1.9.2+)
-group :development do
-#  gem 'debugger'
+platform :ruby_19 do
+  group :development, :test do
+    gem 'debugger'
+  end
 end
 
-# Bundle the extra gems:
-# gem 'bj'
-# gem 'nokogiri'
-# gem 'sqlite3-ruby', :require => 'sqlite3'
-# gem 'aws-s3', :require => 'aws/s3'
+platform :ruby_20, :ruby_21 do
+  group :development, :test do
+    gem 'pry'
+  end
+end
 
-# Bundle gems for the local environment. Make sure to
-# put test-only gems in this group so their generators
-# and rake tasks are available in development mode:
-# group :development, :test do
-#   gem 'webrat'
-# end
-#gem "hobo_support", :path => "../.."
-#gem "hobo_fields", :path => "../.."
-#gem "dryml", :path => "../.."
 gem "hobo", :path => "../.."
-# gem "hobo_rapid", :path => "../.."
-# gem "hobo_clean", :path => "../.."
-# gem "hobo_clean_sidemenu", :path => "../.."
-# gem "hobo_jquery", :path => "../.."
 gem "hobo_jquery_ui", :path => "../.."
 
 gem "jquery-ui-themes", "~> 0.0.4"
 
-#gem "hobo_bootstrap", :git => "git://github.com/Hobo/hobo_bootstrap"
-gem "hobo_bootstrap", :path => "../../../hobo_bootstrap"
-gem "hobo_bootstrap_ui", :path => "../../../hobo_bootstrap_ui"
+gem "hobo_bootstrap", :git => "git://github.com/Hobo/hobo_bootstrap"
+gem "hobo_bootstrap_ui", :git => "git://github.com/Hobo/hobo_bootstrap_ui"
+# gem "hobo_bootstrap", :path => "../../../hobo_bootstrap"
+# gem "hobo_bootstrap_ui", :path => "../../../hobo_bootstrap_ui"
 
-gem "will_paginate", :git => "git://github.com/Hobo/will_paginate.git"
+gem "hobo_will_paginate"#, :git => "git://github.com/Hobo/will_paginate.git"
 
 gem "kramdown"
 gem "RedCloth"
@@ -60,29 +52,18 @@ gem "shoulda", :group => :test
 gem "factory_girl_rails", :group => :test
 
 group :development, :test do
-  gem 'capybara', :git => 'git://github.com/jnicklas/capybara.git'#, :ref => "83d8574c1d"  #"756ec1b2af70c66093c3b25976f520a3e6c3c2ae"
-#  gem 'capybara-webkit', :git => 'git://github.com/thoughtbot/capybara-webkit.git'
-#  gem 'capybara-webkit', :git => 'https://github.com/josephbridgwaterrowe/capybara-webkit.git', :branch => 'patch-1'
+  gem 'capybara'
   gem 'database_cleaner'
+  gem 'better_errors'
+  gem "binding_of_caller"
+  gem "capybara-screenshot"
+  gem "poltergeist"
+  gem 'phantomjs', :require => 'phantomjs/poltergeist'
 end
 
 gem "jquery-rails"
 
 #gem "hobo-jquery", :git => "git://github.com/bryanlarsen/hobo-jquery.git", :branch => "no-prototype"
-
-gem 'paperclip',     '~> 2.7'
-
-# Gems used only for assets and not required
-# in production environments by default.
-group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
-
-  # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-#  gem 'therubyracer', :platforms => :ruby
-
-  gem 'uglifier', '>= 1.0.3'
-end
 
 gem 'awesome_print'
 
@@ -94,4 +75,9 @@ gem "hobo_tokeninput", :git => "git://github.com/Hobo/hobo_tokeninput"
 # gem "quiet_assets"
 
 gem 'acts_as_list'
+gem 'paperclip', '3.5.2'
 gem 'hobo_paperclip', :git => 'git://github.com/Hobo/hobo_paperclip'
+
+gem "protected_attributes"
+gem 'responders', '~> 2.0'
+

@@ -25,9 +25,5 @@ module Hobo
       template( 'activation.erb', File.join(mailer_dir, "activation.erb")) if options[:activation_email]
     end
 
-    hook_for :test_framework, :as => :mailer do | instance, mailer |
-      instance.invoke mailer, ["#{instance.name}_mailer"]
-    end
-
   end
 end

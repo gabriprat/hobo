@@ -10,7 +10,7 @@ class Story < ActiveRecord::Base
   end
 
   belongs_to :project, :inverse_of => :stories
-  belongs_to :status, :class_name => "StoryStatus"
+  belongs_to :status, :class_name => "StoryStatus", :inverse_of => :stories
 
   has_many :tasks, :dependent => :destroy, :order => :position, :accessible => true, :inverse_of => :story
 

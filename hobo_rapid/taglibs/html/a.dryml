@@ -137,6 +137,8 @@ The standard AJAX attributes are supported.
       href = object_url(target, "new", params)
 
       if href && (force || can_create?(new_record))
+        # Remove the object from memory after checking permissions
+        target.delete(new_record) if new_record && target.respond_to?(:build)
         new_class_name = if target.respond_to?(:proxy_association)
                            target.proxy_association.reflection.klass.name
                          else

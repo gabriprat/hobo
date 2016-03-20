@@ -11,9 +11,9 @@ Gem::Specification.new do |s|
   s.summary = "The Don't Repeat Yourself Markup Language"
   s.description = "The Don't Repeat Yourself Markup Language"
 
-  s.add_runtime_dependency('actionpack', ["~> 3.2.0"])
+  s.add_runtime_dependency('actionpack')
   s.add_runtime_dependency('hobo_support', ["= #{version}"])
-  s.add_development_dependency('rubydoctest', [">= 1.1.3"])
+  # s.add_development_dependency('rubydoctest', [">= 1.1.3"])
   s.add_development_dependency('cucumber', '~> 1.1.0')
   s.add_development_dependency('aruba', '~> 0.4.6')
 

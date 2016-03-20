@@ -1,7 +1,7 @@
 The DRYML Guide
 {: .document-title}
 
-DRYML is a templating language based on the concept of composable parameterized tags.  This makes it possible to create a complex tag (such as a whole web page) whose inner (parameterized) pieces can be customized differently on different invocations.  For example, for every resouce (model-view-controller) created in application, hobo automatically creates an associated CRUD interface that is easily adaptable to meet the application's requirements.  Indeed, most Hobo applications, even the ones with complex interfaces, simply use the generated interface with minor adaptions.
+DRYML is a templating language based on the concept of composable parameterized tags.  This makes it possible to create a complex tag (such as a whole web page) whose inner (parameterized) pieces can be customized differently on different invocations.  For example, for every resource (model-view-controller) created in application, hobo automatically creates an associated CRUD interface that is easily adaptable to meet the application's requirements.  Indeed, most Hobo applications, even the ones with complex interfaces, simply use the generated interface with minor adaptions.
 
 This chapter is devoted to the details of how to use, create and extend DRYML tags.  If you have little or no experience with Hobo and DRYML, then it would be better for you to start with the Agility tutorial---to get an understanding of how DRYML is used---before staring on this chapter.  If you are developing an application and want to customize part of the interface, then it would be better for you to start in the app/views/taglibs/auto/rapid/ directory of your application, where the automatically generated tags are stored.  If you need more information about the tags used construct your application's interface, or need specialized tags, then you probably should be exploring the Tab Libraries (Taglibs).  Finally, if you need to create new tags, extend old tags, or need to call tags in a non-simple way, then read on.
 
@@ -651,6 +651,8 @@ It's a common need to want alternating styles for items in a collection - e.g. s
 {.dryml}
 
 That example illustrates another important point -- any Ruby code in attributes is evaluated *inside* the repeat. In other words, the `repeat` attribute behaves the same as wrapping the tag in a `<repeat>` tag.
+
+You can also use `scope.index` to retrieve the index of the element in the collection. It can be useful to number the elements in a table or list.
     
     
 ### `first_item?` and `last_item?` helpers

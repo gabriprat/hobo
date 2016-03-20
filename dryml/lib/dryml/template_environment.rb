@@ -43,6 +43,22 @@ module Dryml
           view.instance_variables.each do |iv|
             instance_variable_set(iv, view.instance_variable_get(iv))
           end
+
+          # Copy some class attributes needed for Sprockets to work correctly
+          self.extend ::Sprockets::Rails::Helper
+
+          self.debug_assets        = view.try(:debug_assets)
+          self.digest_assets       = view.try(:digest_assets)
+          self.assets_prefix       = view.try(:assets_prefix)
+          self.assets_precompile   = view.try(:assets_precompile)
+
+          self.assets_environment  = view.try(:assets_environment)
+          self.assets_manifest     = view.try(:assets_manifest)
+
+          self.resolve_assets_with = view.try(:resolve_assets_with)
+
+          # Expose the app precompiled asset check
+          self.precompiled_asset_checker = view.try(:precompiled_asset_checker)
         end
       end
     end
@@ -95,7 +111,7 @@ module Dryml
 
     def this_field_reflection
       this.try.proxy_association._?.reflection ||
-        (this_parent && this_field && this_parent.class.respond_to?(:reflections) && this_parent.class.reflections[this_field.to_sym])
+        (this_parent && this_field && this_parent.class.respond_to?(:reflections) && this_parent.class.reflections[this_field.to_s])
     end
 
 
@@ -166,12 +182,11 @@ module Dryml
           object = this
         end
       end
-
       id = if (!object.is_a?(ActiveRecord::Relation) && typed_id = object.try.typed_id)
-             typed_id
-           elsif object == @this
-             "this"
-           end
+          typed_id
+        else
+          "this"
+        end
       attribute ? "#{id}:#{attribute}" : id
   end
 
@@ -636,6 +651,9 @@ module Dryml
       @view ? @view.session : {}
     end
 
+    def config
+      @view ? @view.config : {}
+    end
 
     def method_missing(name, *args, &b)
       if @view

@@ -4,7 +4,7 @@ module Generators
       class Router
 
         # specify that an id CANNOT be null - needed to disambiguate /models from /models/[nil]
-        ID_REQUIREMENT = "{ :id => %r([^#{ActionController::Routing::SEPARATORS.join}]+) }"
+        ID_REQUIREMENT = "{ :id => %r([^#{ActionDispatch::Routing::SEPARATORS.join}]+) }"
 
         attr_reader :subsite, :controller, :model, :record, :records
 
@@ -102,15 +102,15 @@ module Generators
             raise ::Hobo::Error, "Hob routing error -- can't find reverse association for #{model}##{owner} " +
                              "(e.g. the :has_many that corresponds to a :belongs_to)" if collection_refl.nil?
             collection         = collection_refl.name
-            owner_class        = model.reflections[owner].klass.name.underscore
-            owner = owner.to_s.singularize if model.reflections[owner].macro == :has_many
+            owner_class        = model.reflections[owner.to_s].klass.name.underscore
+            owner = owner.to_s.singularize if model.reflections[owner.to_s].macro == :has_many
             collection_path = "#{owner_class.pluralize}/:#{owner}_id/#{collection}"
 
             routes = []
-            routes << "get 'new', :on => :new, :action => 'new_for_#{owner}'" if actions.include?(:new)
+            routes << "get '/', :on => :new, :action => 'new_for_#{owner}'" if actions.include?(:new)
             collection_routes = []
-            collection_routes << "get 'index', :action => 'index_for_#{owner}'" if actions.include?(:index)
-            collection_routes << "post 'create', :action => 'create_for_#{owner}'" if actions.include?(:create)
+            collection_routes << "get '/', :action => 'index_for_#{owner}'" if actions.include?(:index)
+            collection_routes << "post '/', :action => 'create_for_#{owner}'" if actions.include?(:create)
             routes << {"collection" => collection_routes} unless collection_routes.empty?
 
             { "resources :#{owner_class.pluralize}, :as => :#{owner}, :only => []" =>
@@ -167,8 +167,8 @@ module Generators
             raise ::Hobo::Error, "Hob routing error -- can't find reverse association for #{model}##{owner} " +
                              "(e.g. the :has_many that corresponds to a :belongs_to)" if collection_refl.nil?
             collection         = collection_refl.name
-            owner_class        = model.reflections[owner].klass.name.underscore
-            owner = owner.to_s.singularize if model.reflections[owner].macro == :has_many
+            owner_class        = model.reflections[owner.to_s].klass.name.underscore
+            owner = owner.to_s.singularize if model.reflections[owner.to_s].macro == :has_many
             collection_path = "#{owner_class.pluralize}/:#{owner}_id/#{collection}"
 
             actions.each do |action|
@@ -210,9 +210,11 @@ module Generators
           return [] unless controller < ::Hobo::Controller::UserBase
           prefix = records == "users" ? "" : "#{record}_"
           [
-          link("match '#{prefix}login(.:format)' => '#{records}#login', :as => '#{record}_login'",  'login'),
+          link("post '#{prefix}login(.:format)' => '#{records}#login', :as => '#{record}_login_post'",  'login'),
+          link("get '#{prefix}login(.:format)' => '#{records}#login', :as => '#{record}_login'",  'login'),
           link("get '#{prefix}logout(.:format)' => '#{records}#logout', :as => '#{record}_logout'",  'logout'),
-          link("match '#{prefix}forgot_password(.:format)' => '#{records}#forgot_password', :as => '#{record}_forgot_password'",  'forgot_password'),
+          link("get '#{prefix}forgot_password(.:format)' => '#{records}#forgot_password', :as => '#{record}_forgot_password'",  'forgot_password'),
+          link("post '#{prefix}forgot_password(.:format)' => '#{records}#forgot_password', :as => '#{record}_forgot_password_post'",  'forgot_password'),
           ].compact
         end
 

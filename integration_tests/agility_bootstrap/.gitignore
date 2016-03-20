@@ -7,3 +7,5 @@ config/hobo_routes.rb
 patches-master
 chromedriver.log
 public/system/projects/reports/**
+screenshot_*
+vendor/cache

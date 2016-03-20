@@ -31,7 +31,7 @@ module Hobo
           params = options.fetch(:params, [])
           allowed = params.dup
           params.each do |p|
-            if (refl = model.reflections[p]) && refl.macro == :belongs_to
+            if (refl = model.reflections[p.to_s]) && refl.macro == :belongs_to
               allowed << refl.foreign_key.to_s
               allowed << refl.options[:foreign_type] if refl.options[:polymorphic]
             end
@@ -48,6 +48,7 @@ module Hobo
 
         def run!(user, attributes)
           record = lifecycle.model.new
+          record.set_creator user
           record.lifecycle.active_step = self
           record.with_acting_user(user) do
             prepare!(record, attributes)

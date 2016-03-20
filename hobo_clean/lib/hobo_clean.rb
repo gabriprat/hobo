@@ -1,5 +1,6 @@
 require 'hobo_rapid'
 require 'hobo_jquery'
+require 'will_paginate'
 
 module HoboClean
 

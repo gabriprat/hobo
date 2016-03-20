@@ -1,17 +1,20 @@
-The README for hobo is in hobo/README.
+[ ![Codeship Status for Hobo/hobo](https://codeship.com/projects/6dd714c0-6cd7-0132-7429-3a463caf9dbd/status?branch=master)](https://codeship.com/projects/54101)
 
-However, you're probably more interested in hobo/CHANGES-1.4.txt or
-http://cookbook.hobocentral.net
+The README for hobo is in hobo/README.md
+
+However, if youre reading this, you'll probably be more interested in 
+hobo/CHANGES-2.1.md or [Hobo Central](http://cookbook.hobocentral.net)
 
 ### Unit tests
 
     export HOBODEV=`pwd`
     for f in dryml hobo_support hobo_fields hobo ; do cd $f ; bundle install ; cd .. ; done
     rake test
+    unset HOBODEV
 
 ### Integration tests
 
-see README in integration_tests/agility
+See integration\_tests/agility\_bootstrap/README.md for details
 
 ### Smoke test
 
@@ -25,3 +28,4 @@ Prerequisites:  RVM, wget.   Creates and uses the hobo-smoke rvm gemset.
     export HOBODEV
     cd integration_tests
     ./smoke_test.sh
+

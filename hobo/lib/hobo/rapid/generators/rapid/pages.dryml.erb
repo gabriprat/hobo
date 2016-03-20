@@ -105,11 +105,11 @@ model_key = model.to_s.underscore
 
 <%
 back_link      = model.view_hints.parent
-back_link_human_name = model.reflections[back_link] && model.reflections[back_link].klass unless back_link.blank?
+back_link_human_name = model.reflections[back_link.to_s] && model.reflections[back_link.to_s].klass unless back_link.blank?
 back_link_human_name = back_link_human_name && back_link_human_name.model_name.human
 boolean_fields = model.table_exists? ? (model.columns.select { |c| c.type == :boolean }.*.name - model.view_hints.inline_booleans) : []
 creator        = model.creator_attribute
-creator_link   = creator && model.reflections[creator] && linkable?(model.reflections[creator].klass, :show)
+creator_link   = creator && model.reflections[creator.to_s] && linkable?(model.reflections[creator.to_s].klass, :show)
 edit_link      = linkable?(model, :edit)
 main_content   = model.primary_content_attribute
 show_fields    = standard_fields(:belongs_to).*.to_s - [model.name_attribute, main_content, creator, back_link, *boolean_fields].*.to_s
@@ -118,7 +118,7 @@ is_user_model = model < Hobo::Model::UserBase
 
 collection     = model.view_hints.primary_children
 if collection
-  collection_class = model.reflections[collection].klass
+  collection_class = model.reflections[collection.to_s].klass
   owner            = model.reverse_reflection(collection)._?.name
   if owner
     add_link = collection && linkable?(collection_class, :"new_for_#{owner}")
@@ -127,7 +127,7 @@ if collection
 end
 
 unless model.view_hints.secondary_children.empty?
-  aside_collections = model.view_hints.secondary_children.map { |c| [model.reflections[c], model.reverse_reflection(c)] }
+  aside_collections = model.view_hints.secondary_children.map { |c| [model.reflections[c.to_s], model.reverse_reflection(c)] }
 end
 -%>
 <def tag="show-page" for="<%= model.name %>">
@@ -261,14 +261,14 @@ name_attribute = model.name_attribute
 
 <% controller.owner_actions.each_pair do |owner, actions| -%>
 <%
-collection_name = model.reverse_reflection(owner).name.to_s
-owner_model     = model.reflections[owner].klass
+collection_name = model.reverse_reflection(owner.to_s).name.to_s
+owner_model     = model.reflections[owner.to_s].klass
 linkable_owner  = linkable?(owner_model, :show)
 owner_tag       = linkable_owner ? "a" : "name"
 
 owner_is_user = owner_model < Hobo::Model::UserBase
 
-owner = model.reflections[owner].macro == :has_many ? owner.to_s.singularize : owner.to_s
+owner = model.reflections[owner.to_s].macro == :has_many ? owner.to_s.singularize : owner.to_s
 -%>
 <% if :index.in? actions -%>
 <%

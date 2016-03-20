@@ -132,14 +132,30 @@ module Hobo
         names += public_instance_methods.*.to_s
       end
 
-      def belongs_to_with_creator_metadata(name, options={}, &block)
+      def belongs_to_with_creator_metadata(name, *args, &block)
+        if args.size == 0 || (args.size == 1 && args[0].kind_of?(Proc))
+            options = {}
+            args.push(options)
+        elsif args.size == 1
+            options = args[0]
+        else
+            options = args[1]
+        end
         self.creator_attribute = name.to_sym if options.delete(:creator)
-        belongs_to_without_creator_metadata(name, options, &block)
+        belongs_to_without_creator_metadata(name, *args, &block)
       end
 
-      def belongs_to_with_test_methods(name, options={}, &block)
-        belongs_to_without_test_methods(name, options, &block)
-        refl = reflections[name]
+      def belongs_to_with_test_methods(name, *args, &block)
+        if args.size == 0 || (args.size == 1 && args[0].kind_of?(Proc))
+            options = {}
+            args.push(options)
+        elsif args.size == 1
+            options = args[0]
+        else
+            options = args[1]
+        end
+        belongs_to_without_test_methods(name, *args, &block)
+        refl = reflections[name.to_s]
         id_method = refl.options[:primary_key] || refl.klass.primary_key
         if options[:polymorphic]
           # TODO: the class lookup in _is? below is incomplete; a polymorphic association to an STI base class
@@ -227,7 +243,6 @@ module Hobo
 
       def find_by_sql(*args)
         result = super
-        result.member_class = self # find_by_sql always returns array
         result
       end
 
@@ -244,7 +259,7 @@ module Hobo
 
 
       def reverse_reflection(association_name)
-        refl = reflections[association_name.to_sym] or raise "No reverse reflection for #{name}.#{association_name}"
+        refl = reflections[association_name.to_s] or raise "No reverse reflection for #{name}.#{association_name}"
         return nil if refl.options[:conditions] || refl.options[:polymorphic]
 
         if refl.macro == :has_many && (self_to_join = refl.through_reflection)
@@ -278,7 +293,7 @@ module Hobo
               r.klass >= self &&
               !r.options[:conditions] &&
               !r.options[:scope] &&
-              r.foreign_key == refl.foreign_key
+              r.foreign_key.to_s == refl.foreign_key.to_s
           end
         end
       end

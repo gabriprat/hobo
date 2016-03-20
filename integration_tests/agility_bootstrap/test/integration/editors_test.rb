@@ -1,19 +1,8 @@
 # -*- coding: utf-8 -*-
 require 'test_helper'
-require 'capybara'
-require 'capybara/dsl'
-require 'database_cleaner'
-
-Capybara.app = Agility::Application
-Capybara.default_driver = :rack_test
-DatabaseCleaner.strategy = :truncation
-
-Capybara.register_driver :selenium_chrome do |app|
-  Capybara::Selenium::Driver.new(app, :browser => :chrome)
-end
+require 'integration_test_helper'
 
 class EditorsTest < ActionDispatch::IntegrationTest
-  include Capybara::DSL
   self.use_transactional_fixtures = false
 
   setup do
@@ -30,24 +19,17 @@ class EditorsTest < ActionDispatch::IntegrationTest
     text_value ||= value
     assert find("#{selector} .in-place-edit").has_no_text?(text_value)
     find("#{selector} .in-place-edit").click
-    sleep 1
     find("#{selector} input[type=text],#{selector} textarea").set(value)
     find("h2.heading").click # just to get a blur
-    assert find("#{selector} .in-place-edit").has_text?(text_value)
+    assert page.find("#{selector} .in-place-edit").has_text?(text_value)
     @verify_list << { :selector => selector, :value => text_value }
-  end
-
-  def wait_for_updates_to_finish
-    while page.evaluate_script("$(document).hjq('numUpdates')").to_i > 0
-      sleep 0.1
-    end
   end
 
 
   test "editors" do
-    Capybara.current_driver = :selenium_chrome
-    Capybara.default_wait_time = 5
+    Capybara.default_max_wait_time = 5
     visit root_path
+    Capybara.current_session.driver.resize(1024,700)
 
     # log in as Administrator
     click_link "Log out" rescue Capybara::ElementNotFound
@@ -79,28 +61,23 @@ class EditorsTest < ActionDispatch::IntegrationTest
     @verify_list << { :selector => ".bool1-field .controls", :value => "Yes" }
 
     find(".bool2-field .controls input[type=checkbox]").click
-    wait_for_updates_to_finish
+    sleep 0.2
     find(".bool2-field .controls input[type=checkbox]").click
+    sleep 0.2
     @verify_list << { :selector => ".bool2-field .controls", :value => "No" }
 
     find(".es-field .controls select").select("C")
     @verify_list << { :selector => ".es-field .controls", :value => "C" }
 
-    if Capybara.current_driver == :selenium
-      fill_in "foo[i]", :with => "17"
-      click_button "reload editors"
-    else
-      find("#bug305i input.foo-i").set("192")
-      click_button "reload editors"
 
-      assert find(".i-field .controls .in-place-edit").has_text?("192")
+    find("#bug305i input.foo-i").set("192")
+    click_button "reload editors"
+    assert find(".i-field .controls .in-place-edit").has_text?("192")
 
-      find(".i-field .controls .in-place-edit").click
-      sleep 1
-      find(".i-field .controls input[type=text]").set('17')
-      find("h2.heading").click # just to get a blur
-      assert find(".i-field .controls .in-place-edit").has_text?('17')
-    end
+    find(".i-field .controls .in-place-edit").click
+    find(".i-field .controls input[type=text]").set('17')
+    find("h2.heading").click # just to get a blur
+    assert find(".i-field .controls .in-place-edit").has_text?('17')
 
     click_link "exit editors"
 

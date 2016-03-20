@@ -1,3 +1,5 @@
+require 'will_paginate'
+
 module HoboCleanAdmin
 
   VERSION = File.read(File.expand_path('../../VERSION', __FILE__)).strip

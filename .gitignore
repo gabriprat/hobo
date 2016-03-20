@@ -11,5 +11,6 @@ dryml/doc
 .rvmrc
 Gemfile.lock
 .svn
+.idea
 
 */*.gem

@@ -26,7 +26,7 @@ module Hobo
       copy_file 'gitkeep',                               'app/assets/javascripts/front/.gitkeep'
 
       application "#"
-      application "config.assets.precompile += %w(front.css front.js)"
+      application "config.assets.precompile += %w(front.css front.js ajax-loader.gif)"
       application "# Hobo: the front subsite loads front.css & front.js"
     end
 

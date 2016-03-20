@@ -25,7 +25,6 @@ Under the 'Hobo' group we find the hobo generators:
       hobo:setup_wizard
       hobo:subsite
       hobo:subsite_taglib
-      hobo:test_framework
       hobo:user_controller
       hobo:user_mailer
       hobo:user_model
@@ -62,9 +61,6 @@ Here are the static options as printed by the --help option:
 
         [--migration-migrate]                            # Generate migration and migrate
                                                          # Default: true
-        [--fixture-replacement=FIXTURE_REPLACEMENT]      # Use a specific fixture replacement
-        [--fixtures]                                     # Add the fixture option to the test framework
-                                                         # Default: true
         [--wizard]                                       # Ask instead using options
                                                          # Default: true
         [--update]                                       # Run bundle update to install the missing gems
@@ -81,7 +77,6 @@ Here are the static options as printed by the --help option:
                                                          # Default: true
         [--user-resource-name=USER_RESOURCE_NAME]        # User Resource Name
                                                          # Default: user
-    -t, [--test-framework=TEST_FRAMEWORK]                # Use a specific test framework
                                                          # Default: test_unit
         [--locales=one two three]                        # Choose the locales
                                                          # Default: en
@@ -109,35 +104,6 @@ Shows the main title (used internally just for aesthetic reasons)
 Invokes the hobo:assets generator.  It just copies a few files needed
 by all Hobo applications.
 
-
-
-### Test Framework
-
-#### --test-framework=TEST_FRAMEWORK
-
-Invokes the hobo:test_framework generator.
-
-Interactively set by:`Do you want to customize the test_framework?`
-and`Choose your preferred test framework: [<enter>=test_unit|rspec|shoulda|rspec_with_shoulda]`.
-
-This gives you the opportunity to change the test framework.
-Subsequent generators will use it for generating tests.   The default
-choice is `test_unit` (Test::Unit)
-
-#### --fixtures  
-Interactively set by `Do you want the test framework to generate the fixtures?`.
-
-If set, fixtures are generated.
-
-#### --fixture-replacement=FIXTURE_REPLACEMENT 
-
-Interactively set by: `Type your preferred fixture replacement or <enter> for no replacement:`.
-
-This option is passed to the Rails3 generator.  If you do not have the
-chosen fixture replacement installed bundler will attempt to install
-it.  One list of available replacements is on
-[ruby-toolbox.com](http://ruby-toolbox.com/categories/testing_frameworks.html),
-but there are probably others available.
 
 ### User Resource
 

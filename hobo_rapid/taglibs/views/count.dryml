@@ -74,8 +74,10 @@ with :it locale and summary="choice" (key "tags.count.choice")
               this.model_name.human(:count=>c)
             when (attr = this.try.origin_attribute)
               (this_parent || this.origin).class.human_attribute_name(attr, :count=>c)
+            when this.member_class
+              this.member_class.model_name.human(:count => c)
             else
-              this.member_class.model_name.human(:count=>c)
+              this.first.class.model_name.human(:count => c)
             end
 
   label = label.downcase if lowercase
