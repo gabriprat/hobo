@@ -97,6 +97,8 @@ module HoboFields
             check_attributes.any? do |k|
               if k==:default && sql_type==:datetime
                 col_spec.default.try.to_datetime != default.try.to_datetime
+              elsif k==:default && sql_type==:boolean
+                col_spec.default.to_s != default.to_s # database stores false as "false"
               else
                 col_spec.send(k) != self.send(k)
               end
